@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CYK Algorithm Visualizer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500;600&family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/simulator.css">
+</head>
+<body>
+
+<header>
+  <div style="display:flex;align-items:center;gap:16px;">
+    <a href="index.html" class="back-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+      Back
+    </a>
+    <div class="logo">
+      <div class="logo-icon">CYK</div>
+      Algorithm Visualizer
+    </div>
+  </div>
+  <span class="header-badge">Theory of Computation</span>
+</header>
+
+<div class="container">
+  <!-- ═══ LEFT PANEL ═══ -->
+  <div class="panel-left">
+
+    <!-- Grammar Card -->
+    <div class="card">
+      <div class="card-title"><span class="card-title-dot"></span>Grammar (CNF)</div>
+
+      <label>Context-Free Grammar — one rule per line</label>
+      <textarea id="grammar-input">S -> AB | BC
+A -> BA | a
+B -> CC | b
+C -> AB | a</textarea>
+
+      <div class="cnf-warn" id="cnf-warn"></div>
+
+      <div class="examples-label">Quick examples:</div>
+      <div class="examples-row">
+        <span class="ex-chip" onclick="loadExample(0)">ab (CNF)</span>
+        <span class="ex-chip" onclick="loadExample(1)">baaba (CNF)</span>
+        <span class="ex-chip" onclick="loadExample(2)">aSb→CNF</span>
+        <span class="ex-chip" onclick="loadExample(3)">aab (CNF)</span>
+        <span class="ex-chip" onclick="loadExample(4)">aS→CNF</span>
+      </div>
+    </div>
+
+    <!-- Input String Card -->
+    <div class="card">
+      <div class="card-title"><span class="card-title-dot"></span>Input String</div>
+
+      <label>String to parse</label>
+      <input type="text" id="string-input" value="baaba" placeholder="e.g. baaba" style="font-size:16px;letter-spacing:3px;text-align:center">
+
+      <div class="btn-row">
+        <button class="btn-primary" onclick="runCYK()">▶ Run CYK</button>
+        <button class="btn-green" onclick="stepMode()">⏭ Step-by-Step</button>
+        <button class="btn-ghost" onclick="resetAll()">✕ Reset</button>
+      </div>
+
+      <button class="btn-next" id="next-btn" style="display:none;margin-top:10px;width:100%;justify-content:center" onclick="nextStep()">
+        Next Step →
+      </button>
+
+      <div class="speed-row">
+        <label>Speed</label>
+        <input type="range" id="speed" min="100" max="1500" value="700" step="100" oninput="document.getElementById('speed-label').textContent=this.value+'ms'">
+        <span class="speed-val" id="speed-label">700ms</span>
+      </div>
+    </div>
+
+    <!-- Algorithm Stats Card -->
+    <div class="card" id="stats-card" style="display:none">
+      <div class="card-title"><span class="card-title-dot"></span>Run Statistics</div>
+      <div class="algo-info">
+        <div class="algo-stat">
+          <div class="algo-stat-label">String length</div>
+          <div class="algo-stat-value" id="stat-n">—</div>
+        </div>
+        <div class="algo-stat">
+          <div class="algo-stat-label">Total cells</div>
+          <div class="algo-stat-value" id="stat-cells">—</div>
+        </div>
+        <div class="algo-stat">
+          <div class="algo-stat-label">Variables</div>
+          <div class="algo-stat-value" id="stat-vars">—</div>
+        </div>
+        <div class="algo-stat">
+          <div class="algo-stat-label">Rules</div>
+          <div class="algo-stat-value" id="stat-rules">—</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ═══ RIGHT PANEL ═══ -->
+  <div class="panel-right">
+
+    <!-- Status bar -->
+    <div id="status-bar"></div>
+
+    <!-- Table Card -->
+    <div class="card">
+      <div class="card-title"><span class="card-title-dot"></span>CYK Parsing Table</div>
+
+      <div class="progress-wrap" id="progress-wrap">
+        <div class="progress-bar" id="progress-bar"></div>
+      </div>
+
+      <div class="legend">
+        <div class="leg-item"><div class="leg-box" style="background:#dbeafe;border-color:#3b82f6"></div>Active</div>
+        <div class="leg-item"><div class="leg-box" style="background:#fef9c3;border-color:#fde047"></div>New variable</div>
+        <div class="leg-item"><div class="leg-box" style="background:#f0fdf4;border-color:#bbf7d0"></div>Computed</div>
+        <div class="leg-item"><div class="leg-box" style="background:#bbf7d0;border-color:#22c55e"></div>Accepted</div>
+        <div class="leg-item"><div class="leg-box" style="background:#fecaca;border-color:#ef4444"></div>Rejected</div>
+      </div>
+
+      <div class="table-scroll" id="table-wrap">
+        <div class="empty-table">
+          <div class="empty-table-icon">⊡</div>
+          <div>Run the algorithm to see the parsing table</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Explanation Card -->
+    <div class="card">
+      <div class="card-title"><span class="card-title-dot"></span>Explanation Panel</div>
+      <div class="explain-inner" id="explain-panel">
+        <div class="empty-state">
+          <span style="font-size:16px">◎</span>
+          Click any cell in the table to see how it was computed — or run the algorithm to begin.
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script src="js/simulator.js"></script>
+</body>
+</html>
