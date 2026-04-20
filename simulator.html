@@ -33,10 +33,7 @@
       <div class="card-title"><span class="card-title-dot"></span>Grammar (CNF)</div>
 
       <label>Context-Free Grammar — one rule per line</label>
-      <textarea id="grammar-input">S -> AB | BC
-A -> BA | a
-B -> CC | b
-C -> AB | a</textarea>
+      <textarea id="grammar-input" placeholder="Enter grammar here..."></textarea>
 
       <div class="cnf-warn" id="cnf-warn"></div>
 
@@ -55,7 +52,7 @@ C -> AB | a</textarea>
       <div class="card-title"><span class="card-title-dot"></span>Input String</div>
 
       <label>String to parse</label>
-      <input type="text" id="string-input" value="baaba" placeholder="e.g. baaba" style="font-size:16px;letter-spacing:3px;text-align:center">
+      <input type="text" id="string-input" value="" placeholder="e.g. baaba" style="font-size:16px;letter-spacing:3px;text-align:center">
 
       <div class="btn-row">
         <button class="btn-primary" onclick="runCYK()">▶ Run CYK</button>
